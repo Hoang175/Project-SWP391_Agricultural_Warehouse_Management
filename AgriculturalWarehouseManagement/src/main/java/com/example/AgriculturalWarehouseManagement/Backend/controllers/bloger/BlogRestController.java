@@ -46,8 +46,8 @@ public class BlogRestController {
     @GetMapping("/page")
     public ResponseEntity<?> getMyBlogPage(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "3") int size
-//            @RequestParam(required = false) String status // Bổ sung dòng này
+            @RequestParam(defaultValue = "3") int size ,
+            @RequestParam(required = false) String status // Bổ sung dòng này
     ) {
 
         Object user = session.getAttribute("account");
@@ -57,14 +57,20 @@ public class BlogRestController {
         UserResponse accountId = (UserResponse) user;
 
 
-       Page<Blog> blogPage = blogService.getAllStatusBlogsByUserPage((long) accountId.getUserID(), page - 1, size);
-//        Page<Blog> blogPage;
-//        if (status != null && !status.equalsIgnoreCase("ALL") && !status.isEmpty()) {
-//            blogPage = blogService.getBlogsByUserAndStatusPage((long) accountId.getUserID(), BlogStatus.valueOf(status), page - 1, size);
-//        } else {
-//            blogPage = blogService.getAllStatusBlogsByUserPage((long) accountId.getUserID(), page - 1, size);
-//        }
+        Page<Blog> blogPage;
 
+        // Nếu có status và không phải "ALL", thì filter
+        if (status != null && !status.equalsIgnoreCase("ALL") && !status.isEmpty()) {
+            BlogStatus filterStatus;
+            try {
+                filterStatus = BlogStatus.valueOf(status.trim().toUpperCase());
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body("Trạng thái không hợp lệ: " + status);
+            }
+            blogPage = blogService.getAllBlogsPageByStatus(page - 1, size, filterStatus); // bạn sẽ viết hàm này!
+        } else {
+            blogPage = blogService.getAllBlogsPage(page - 1, size);
+        }
         List<BlogDTO> blogDTOs = blogPage.getContent().stream().map(blog -> {
             BlogDTO dto = new BlogDTO();
             dto.setBlogID(blog.getBlogID());
@@ -91,10 +97,11 @@ public class BlogRestController {
     @PostMapping("/add_blog")
     public ResponseEntity<?> addBlog(@RequestBody Blog blog) {
         blog.setCreatedAt(new Date());
-        blog.setStatus(BlogStatus.DRAFT); // Mặc định là DRAFT
-        if (blog.getBlogDetail() != null) {
-            blog.getBlogDetail().setBlog(blog); // set lại quan hệ
+      //  blog.setStatus(BlogStatus.DRAFT); // Mặc định là DRAFT
+        if (blog.getStatus() == null) {                // ⬅️ chỉ set nếu thiếu
+            blog.setStatus(BlogStatus.DRAFT);
         }
+
         Blog savedBlog = blogService.save(blog);
 
         // Convert to DTO before returning
@@ -165,6 +172,9 @@ public class BlogRestController {
         if (blog == null) {
             return ResponseEntity.badRequest().body("Blog không tồn tại");
         }
+//        if (blog.getStatus() == BlogStatus.DELETED) {
+//            return ResponseEntity.badRequest().body("Không thể chỉnh sửa blog đã bị xóa, hãy khôi phục trước");
+//        }
         // Update các trường (tuỳ yêu cầu)
         blog.setTitle(blogUpdate.getTitle());
         blog.setContent(blogUpdate.getContent());

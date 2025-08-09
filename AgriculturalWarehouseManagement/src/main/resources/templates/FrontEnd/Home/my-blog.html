@@ -141,6 +141,13 @@
                             </button>
                         </li>
 
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link " id="deleted" data-bs-toggle="pill"
+                                    data-bs-target="#pills-product" type="button" role="tab"><i
+                                    data-feather="shopping-bag"></i> Đã Xóa Gần Đây
+                            </button>
+                        </li>
+
 
                     </ul>
                 </div>
@@ -173,17 +180,6 @@
 
                                 <div class="total-box">
                                     <div class="row g-sm-4 g-3">
-                                        <!--                                        <div class="col-xxl-4 col-lg-6 col-md-4 col-sm-6">-->
-                                        <!--                                            <div class="total-contain">-->
-                                        <!--                                                <img th:src="@{FrontEnd/assets/images/svg/order.svg}"-->
-                                        <!--                                                     class="img-1 blur-up lazyload" alt="">-->
-                                        <!--                                                <img th:src="@{FrontEnd/assets/images/svg/order.svg}"-->
-                                        <!--                                                     class="blur-up lazyload"-->
-                                        <!--                                                     alt="">-->
-                                        <!--                                                -->
-                                        <!--                                            </div>-->
-                                        <!--                                        </div>-->
-
                                         <div class="col-xxl-4 col-lg-6 col-md-4 col-sm-6">
                                             <div class="total-contain">
                                                 <img th:src="@{FrontEnd/assets/images/svg/wishlist.svg}"
@@ -269,6 +265,73 @@
                                         </thead>
 
                                         <tbody id="blogTableBody">
+                                        <!-- Blog rows sẽ được JS thêm vào đây -->
+                                        </tbody>
+
+                                    </table>
+                                    <!-- Pagination -->
+                                    <nav>
+                                        <ul class="pagination justify-content-center custom-pagination" id="pagination">
+                                            <!-- JS sẽ render ra các nút ở đây -->
+                                        </ul>
+
+                                    </nav>
+
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade " id="deleted-blog" role="tabpanel">
+                            <div class="product-tab">
+                                <div class="title">
+                                    <h2>Đã Xóa Gần đây</h2>
+                                    <span class="title-leaf">
+                <svg class="icon-width bg-gray">
+                    <use xlink:href="../assets/svg/leaf.svg#leaf"></use>
+                </svg>
+            </span>
+<!--                                    <div style="width: 200px; text-align: center; margin-top: 7px; position: relative; z-index: 0">-->
+<!--                                        <button class="btn btn-success"-->
+<!--                                                data-bs-toggle="modal"-->
+<!--                                                data-bs-target="#addProductModal"-->
+<!--                                                style="width:100%; background-color: #198754; color: white; border: none; padding: 8px 16px; font-weight: 500; border-radius: 4px">-->
+<!--                                            + Thêm bài đăng-->
+<!--                                        </button>-->
+<!--                                    </div>-->
+<!--                                    <div class="mb-3 d-flex align-items-center gap-2">-->
+<!--                                        <label for="statusFilter" class="fw-bold mb-0">Lọc trạng thái: </label>-->
+<!--                                        <select id="statusFilter" class="form-select form-select-sm" style="width: 170px; display: inline-block;">-->
+<!--                                            <option value="ALL">Tất cả</option>-->
+<!--                                            <option value="ACTIVE">Đang hoạt động</option>-->
+<!--                                            <option value="INACTIVE">Ngừng hoạt động</option>-->
+<!--                                            <option value="DRAFT">Bản nháp</option>-->
+<!--                                            <option value="DELETED">Đã xoá</option>-->
+<!--                                            <option value="PENDING">Đang chờ</option>-->
+<!--                                            <option value="COMPLETED">Hoàn thành</option>-->
+
+<!--                                        </select>-->
+<!--                                    </div>-->
+                                </div>
+
+                                <div class="table-responsive dashboard-bg-box" style="overflow-x:auto; width:100%;">
+                                    <table class="table blog-table-deleted" style="min-width: 1000px;">
+                                        <!--Bảng Blog-->
+                                        <thead>
+                                        <tr>
+                                            <th scope="col">STT</th>
+                                            <th scope="col">Hình ảnh</th>
+                                            <th scope="col">Nội dung</th>
+                                            <th scope="col">Tiêu đề</th>
+                                            <th scope="col">Tác giả</th>
+                                            <th scope="col">Trạng thái</th>
+                                            <th scope="col">Ngày tạo</th>
+                                            <th scope="col">Khôi phục</th>
+
+                                        </tr>
+                                        </thead>
+
+                                        <tbody id="blogTableDeletedBody">
                                         <!-- Blog rows sẽ được JS thêm vào đây -->
                                         </tbody>
 
@@ -468,28 +531,12 @@
     const pageSize = 3;
     const CONTEXT_PATH = "/AgriculturalWarehouseManagementApplication";
 
-    function loadBlogPage(page = 1) {
-        axios.get(`${CONTEXT_PATH}/api/my-blog/page?page=${page}&size=${pageSize}`)
-            .then(res => {
-                console.log("API data:", res.data); // THÊM LOG NÀY!
-                // Bảo vệ code, nếu không có blogs thì trả về mảng rỗng
-                const data = res.data || {};
-                renderBlogs(data.blogs, data.currentPage, pageSize);
-                renderPagination(data.currentPage, data.totalPages);
-            })
-            .catch(err => {
-                console.error('Lỗi lấy dữ liệu:', err);
-            });
-    }
-
     function renderBlogs(blogs, currentPage, pageSize) {
         const tbody = document.getElementById("blogTableBody");
         tbody.innerHTML = "";
         blogs.forEach((blog, idx) => {
             const tr = document.createElement("tr");
-            // Nếu dùng DTO thì blog.thumbnail là đủ, nếu vẫn là entity thì blog.blogDetail.thumbnail
             const thumbnail = blog.thumbnail || (blog.blogDetail && blog.blogDetail.thumbnail) || "no-image.png";
-            //   const imageSrc = `${CONTEXT_PATH}/Frontend/assets/images/blog/${thumbnail}`; // <-- Sửa ở đây
             const imageSrc = `${CONTEXT_PATH}/blog/${thumbnail}`; // Đường dẫn giống Thymeleaf đã dùng
             const color = getStatusColor(blog.status);
             tr.innerHTML = `
@@ -580,15 +627,28 @@
         }
     }
 
-    // Gọi lại khi tab My Blog được click hoặc trang load vào tab đó!
-    document.addEventListener('DOMContentLoaded', function () {
-        if (document.querySelector("#pills-product").classList.contains("show")) {
-            loadBlogPage(1);
-        }
-        document.getElementById("pills-product-tab").addEventListener('click', function () {
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+        hydrateFilterFromQuery();                              // ⭐ đọc status từ URL nếu có
+
+        document.getElementById("statusFilter")?.addEventListener("change", function () {
+            loadBlogPage(1);                                     // ⭐ đổi dropdown -> reload page 1
+            // loadTotalBlogs(); // nếu bạn có API đếm theo filter thì bật dòng này
+        });
+
+        document.getElementById("pills-product-tab")?.addEventListener("click", function () {
+            hydrateFilterFromQuery();                            // đảm bảo đồng bộ dropdown khi người dùng quay lại tab
             loadBlogPage(1);
         });
-    }); // Hết hàm view blog user
+
+        loadTotalBlogs();
+        loadBlogPage(1);                                       // ⭐ load lần đầu có kèm filter
+    });
+
+    // để phân trang vẫn giữ filter
+    window.gotoPage = function(page){ loadBlogPage(page); };
+
 
 
     // ======================= LOAD CATEGORY & STATUS =======================
@@ -907,6 +967,55 @@
     document.addEventListener('DOMContentLoaded', function () {
         loadTotalBlogs();
     });
+
+    // ====== Helpers ======
+    function getSelectedStatus() {
+        const el = document.getElementById("statusFilter");
+        return el ? el.value : "ALL";
+    }
+
+    function updateQueryString(page, status) {
+        const params = new URLSearchParams(window.location.search);
+        params.set("page", page);
+        if (status && status !== "ALL") params.set("status", status);
+        else params.delete("status");
+        history.replaceState(null, "", `${location.pathname}?${params.toString()}`);
+    }
+
+    function hydrateFilterFromQuery() {
+        const params = new URLSearchParams(window.location.search);
+        const status = params.get("status") || "ALL";
+        const el = document.getElementById("statusFilter");
+        if (el && el.value !== status) el.value = status;
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return "";
+        const d = new Date(dateStr);
+        return d.toLocaleDateString("vi-VN");
+    }
+
+
+    // ====== Core: Load page có filter theo status ======
+    function loadBlogPage(page = 1) {
+        const status = getSelectedStatus();
+        let url = `${CONTEXT_PATH}/api/my-blog/page?page=${page}&size=${pageSize}`;
+        if (status && status !== "ALL") {
+            url += `&status=${encodeURIComponent(status)}`;
+        }
+
+        axios.get(url)
+            .then(res => {
+                const data = res.data || { blogs: [], currentPage: 1, totalPages: 1 };
+                renderBlogs(data.blogs || [], data.currentPage || 1, pageSize);
+                renderPagination(data.currentPage || 1, data.totalPages || 1);
+                updateQueryString(data.currentPage || page, status);
+            })
+            .catch(err => {
+                console.error("Lỗi lấy dữ liệu:", err);
+            });
+    }
+
 
 </script>
 
