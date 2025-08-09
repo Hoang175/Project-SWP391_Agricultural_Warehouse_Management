@@ -60,46 +60,6 @@
 <header th:replace="FrontEnd/fragments/header::header"></header>
 <!-- Header End -->
 
-<!-- mobile fix menu start -->
-<div class="mobile-menu d-md-none d-block mobile-cart">
-    <ul>
-        <li>
-            <a href="index.html">
-                <i class="iconly-Home icli"></i>
-                <span>Home</span>
-            </a>
-        </li>
-
-        <li class="mobile-category">
-            <a href="javascript:void(0)">
-                <i class="iconly-Category icli js-link"></i>
-                <span>Category</span>
-            </a>
-        </li>
-
-        <li>
-            <a href="search.html" class="search-box">
-                <i class="iconly-Search icli"></i>
-                <span>Search</span>
-            </a>
-        </li>
-
-        <li>
-            <a href="wishlist.html" class="notifi-wishlist">
-                <i class="iconly-Heart icli"></i>
-                <span>My Wish</span>
-            </a>
-        </li>
-
-        <li>
-            <a href="cart.html">
-                <i class="iconly-Bag-2 icli fly-cate"></i>
-                <span>Cart</span>
-            </a>
-        </li>
-    </ul>
-</div>
-<!-- mobile fix menu end -->
 
 <!-- Breadcrumb Section Start -->
 <section class="breadcrumb-section pt-0">
@@ -276,8 +236,18 @@
                                             + Thêm bài đăng
                                         </button>
                                     </div>
-                                    <div class="col-md-3">
-                                        <select class="form-select" id="filterStatus" onchange="filterByStatus()"></select>
+                                    <div class="mb-3 d-flex align-items-center gap-2">
+                                        <label for="statusFilter" class="fw-bold mb-0">Lọc trạng thái: </label>
+                                        <select id="statusFilter" class="form-select form-select-sm" style="width: 170px; display: inline-block;">
+                                            <option value="ALL">Tất cả</option>
+                                            <option value="ACTIVE">Đang hoạt động</option>
+                                            <option value="INACTIVE">Ngừng hoạt động</option>
+                                            <option value="DRAFT">Bản nháp</option>
+                                            <option value="DELETED">Đã xoá</option>
+                                            <option value="PENDING">Đang chờ</option>
+                                            <option value="COMPLETED">Hoàn thành</option>
+
+                                        </select>
                                     </div>
                                 </div>
 
@@ -316,71 +286,7 @@
                             </div>
                         </div>
 
-                        <div class="tab-pane fade" id="pills-profile" role="tabpanel">
-                            <div class="dashboard-profile">
-                                <div class="title">
-                                    <h2>My Profile</h2>
-                                    <span class="title-leaf">
-                                            <svg class="icon-width bg-gray">
-                                                <use xlink:href="../assets/svg/leaf.svg#leaf"></use>
-                                            </svg>
-                                        </span>
-                                </div>
 
-                                <div class="profile-tab dashboard-bg-box">
-                                    <div class="dashboard-title dashboard-flex">
-                                        <h3>Profile Name</h3>
-                                        <button class="btn btn-sm theme-bg-color text-white" data-bs-toggle="modal"
-                                                data-bs-target="#edit-profile">Edit Profile
-                                        </button>
-                                    </div>
-
-                                    <ul>
-                                        <li>
-                                            <h5>Company Name :</h5>
-                                            <h5>Grocery Store</h5>
-                                        </li>
-                                        <li>
-                                            <h5>Email Address :</h5>
-                                            <h5>joshuadbass@rhyta.com</h5>
-                                        </li>
-                                        <li>
-                                            <h5>Country / Region :</h5>
-                                            <h5>107 Veltri Drive</h5>
-                                        </li>
-
-                                        <li>
-                                            <h5>Year Established :</h5>
-                                            <h5>2022</h5>
-                                        </li>
-
-                                        <li>
-                                            <h5>Total Employees :</h5>
-                                            <h5>154 - 360 People</h5>
-                                        </li>
-                                        <li>
-                                            <h5>Category :</h5>
-                                            <h5>Grocery</h5>
-                                        </li>
-
-                                        <li>
-                                            <h5>Street Address :</h5>
-                                            <h5>234 High St</h5>
-                                        </li>
-
-                                        <li>
-                                            <h5>City / State :</h5>
-                                            <h5>107 Veltri Drive</h5>
-                                        </li>
-
-                                        <li>
-                                            <h5>Zip :</h5>
-                                            <h5>B23 6SN</h5>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
 
 
                     </div>
@@ -541,177 +447,7 @@
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<script>
-    // ====== CẤU HÌNH CHUNG ======
-    const pageSize = 3;
-    const CONTEXT_PATH = "/AgriculturalWarehouseManagementApplication";
 
-    // Helper: lấy status đang chọn
-    function getSelectedStatus() {
-        const el = document.getElementById("filterStatus");
-        return el ? el.value : "ALL";
-    }
-
-    // ====== LOAD TRẠNG THÁI (CHO DROPDOWN) ======
-    function loadStatusFilterOptions() {
-        axios.get(`${CONTEXT_PATH}/api/my-blog/status-list`)
-            .then(res => {
-                const select = document.getElementById('filterStatus');
-                select.innerHTML = `<option value="ALL">Tất cả trạng thái</option>`;
-                (res.data || []).forEach(st => {
-                    const label = getStatusLabelVi(st.name);
-                    select.innerHTML += `<option value="${st.name}">${label}</option>`;
-                });
-            })
-            .catch(err => console.error("Lỗi load status-list:", err));
-    }
-
-    // ====== LOAD PAGE CÓ FILTER ======
-    function loadBlogPage(page = 1) {
-        const status = getSelectedStatus();
-        const params = { page, size: pageSize };
-        if (status && status !== 'ALL') params.status = status; // chỉ gửi khi có filter
-
-        axios.get(`${CONTEXT_PATH}/api/my-blog/page`, { params })
-            .then(res => {
-                const data = res.data || {};
-                renderBlogs(data.blogs || [], data.currentPage || 1, pageSize);
-                renderPagination(data.currentPage || 1, data.totalPages || 1);
-            })
-            .catch(err => console.error('Lỗi lấy dữ liệu:', err));
-    }
-
-    // ====== RENDER BLOG LIST ======
-    function renderBlogs(blogs, currentPage, pageSize) {
-        const tbody = document.getElementById("blogTableBody");
-        tbody.innerHTML = "";
-        (blogs || []).forEach((blog, idx) => {
-            const tr = document.createElement("tr");
-            const thumbnail = blog.thumbnail || (blog.blogDetail && blog.blogDetail.thumbnail) || "no-image.png";
-            const imageSrc = `${CONTEXT_PATH}/blog/${thumbnail}`;
-            const color = getStatusColor(blog.status);
-            tr.innerHTML = `
-        <td>${(currentPage - 1) * pageSize + idx + 1}</td>
-        <td><img src="${imageSrc}" style="max-width:100px; max-height:60px;" alt=""></td>
-        <td>${blog.content && blog.content.length > 40 ? blog.content.substring(0, 40) + '...' : (blog.content || '')}</td>
-        <td>${blog.title || ""}</td>
-        <td><b><i>${blog.author || ""}</i></b></td>
-        <td><span style="font-weight:bold;color:${color}">${getStatusLabelVi(blog.status)}</span></td>
-        <td>${formatDate(blog.createdAt)}</td>
-        <td>
-          <a href="javascript:void(0)" onclick="openEditBlogModal(${blog.blogID})"><i data-feather="edit"></i></a>
-          <a href="javascript:void(0)" onclick="deleteBlog(${blog.blogID})"><i data-feather="trash-2"></i></a>
-        </td>
-      `;
-            tbody.appendChild(tr);
-        });
-        if (window.feather) feather.replace();
-    }
-
-    // ====== PAGINATION (đọc lại filter hiện tại khi chuyển trang) ======
-    function renderPagination(currentPage, totalPages) {
-        let html = '';
-
-        if (currentPage > 1) {
-            html += `<li class="page-item"><a class="page-link" href="#" onclick="gotoPage(${currentPage - 1});return false;">Trước</a></li>`;
-        }
-
-        html += `<li class="page-item${currentPage === 1 ? " active" : ""}">
-               <a class="page-link" href="#" onclick="gotoPage(1);return false;">1</a>
-             </li>`;
-
-        if (currentPage > 3) {
-            html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
-        }
-
-        for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
-            html += `<li class="page-item${i === currentPage ? " active" : ""}">
-                 <a class="page-link" href="#" onclick="gotoPage(${i});return false;">${i}</a>
-               </li>`;
-        }
-
-        if (currentPage < totalPages - 2) {
-            html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
-        }
-
-        if (totalPages > 1) {
-            html += `<li class="page-item${currentPage === totalPages ? " active" : ""}">
-                 <a class="page-link" href="#" onclick="gotoPage(${totalPages});return false;">${totalPages}</a>
-               </li>`;
-        }
-
-        if (currentPage < totalPages) {
-            html += `<li class="page-item"><a class="page-link" href="#" onclick="gotoPage(${currentPage + 1});return false;">Sau</a></li>`;
-        }
-
-        document.getElementById("pagination").innerHTML = html;
-    }
-
-    function gotoPage(page) {
-        loadBlogPage(page);
-    }
-
-    // ====== UTILS ======
-    function formatDate(dateStr) {
-        if (!dateStr) return '';
-        const d = new Date(dateStr);
-        return d.toLocaleDateString('vi-VN');
-    }
-
-    function getStatusColor(status) {
-        switch (status) {
-            case 'ACTIVE': return '#198754';
-            case 'INACTIVE': return '#6c757d';
-            case 'DRAFT': return '#f39c12';
-            case 'PENDING': return '#0dcaf0';
-            case 'PUBLISHED': return '#20c997';
-            case 'DELETED': return '#dc3545';
-            default: return '#212529';
-        }
-    }
-
-    function getStatusLabelVi(status) {
-        switch (status) {
-            case 'ACTIVE': return 'Đang hoạt động';
-            case 'INACTIVE': return 'Ngừng hoạt động';
-            case 'DRAFT': return 'Bản nháp';
-            case 'DELETED': return 'Đã xoá';
-            case 'PENDING': return 'Đang chờ';
-            case 'PUBLISHED': return 'Đã đăng';
-            default: return 'Không xác định';
-        }
-    }
-
-    // ====== BOOTSTRAP: BIND & KHỞI TẠO ======
-    document.addEventListener('DOMContentLoaded', function () {
-        // Đổ dropdown trạng thái, sau đó load trang đầu
-        loadStatusFilterOptions();
-
-        // Change -> reload trang 1 theo filter
-        const filter = document.getElementById("filterStatus");
-        if (filter) {
-            filter.addEventListener('change', () => loadBlogPage(1));
-        }
-
-        // Lần đầu mở tab "Tất cả bài đăng" thì load
-        document.getElementById("pills-product-tab").addEventListener('click', function () {
-            loadBlogPage(1);
-        });
-
-        // Nếu tab này đã active sẵn khi vào trang, vẫn đảm bảo load
-        if (document.querySelector("#pills-product").classList.contains("show")) {
-            loadBlogPage(1);
-        }
-
-        // Đếm tổng blog (giữ nguyên logic cũ của bạn)
-        loadTotalBlogs();
-    });
-
-    // ====== (TÙY CHỌN) Nếu vẫn muốn dùng onclick="filterByStatus()" trong HTML ======
-    function filterByStatus() {
-        loadBlogPage(1);
-    }
-</script>
 
 
 <script>

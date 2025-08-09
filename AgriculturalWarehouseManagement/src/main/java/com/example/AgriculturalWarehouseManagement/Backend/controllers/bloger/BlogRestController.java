@@ -47,7 +47,7 @@ public class BlogRestController {
     public ResponseEntity<?> getMyBlogPage(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "3") int size
-         //  @RequestParam(required = false) String status // Bổ sung dòng này
+//            @RequestParam(required = false) String status // Bổ sung dòng này
     ) {
 
         Object user = session.getAttribute("account");
@@ -55,6 +55,8 @@ public class BlogRestController {
             return ResponseEntity.ok("You are not logged in");
         }
         UserResponse accountId = (UserResponse) user;
+
+
        Page<Blog> blogPage = blogService.getAllStatusBlogsByUserPage((long) accountId.getUserID(), page - 1, size);
 //        Page<Blog> blogPage;
 //        if (status != null && !status.equalsIgnoreCase("ALL") && !status.isEmpty()) {
