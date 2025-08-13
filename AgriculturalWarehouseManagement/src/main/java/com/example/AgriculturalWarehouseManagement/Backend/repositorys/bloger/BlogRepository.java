@@ -9,11 +9,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Date;
 import java.util.List;
 
 public interface BlogRepository extends JpaRepository<Blog, Integer> {
 
-    List<Blog> findAllByStatus(BlogStatus status);
 
     @Query("SELECT b FROM Blog b LEFT JOIN FETCH b.blogDetail WHERE b.blogID = :id")
     Blog findByIdWithDetail(@Param("id") Integer id);
@@ -74,5 +74,10 @@ public interface BlogRepository extends JpaRepository<Blog, Integer> {
                 WHERE b.userid = :userId
             """, nativeQuery = true)
     Long countBlogsByUserId(int userId);
+
+    ///  Code them luc nghi he
+    @Query("SELECT b FROM Blog b WHERE b.status = 'DELETED' AND b.blogDateUpdate < :thresholdDate")
+    List<Blog> findDeletedBlogsBefore(@Param("thresholdDate") Date thresholdDate);
+
 
 }

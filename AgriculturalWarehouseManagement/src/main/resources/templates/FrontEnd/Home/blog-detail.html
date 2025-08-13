@@ -63,10 +63,6 @@
                     <img th:src="@{'/blog/' + ${blog.blogDetail.thumbnail}}"
                          class="img-fluid w-100 h-100 object-fit-cover"
                          style="width:100%;height:100%;object-fit:cover;object-position:center;" alt="">
-                    <!--                    <img src="/AgriculturalWarehouseManagementApplication/Frontend/assets/images/blog/12.jpg"-->
-                    <!--                         class="img-fluid w-100 h-100 object-fit-cover"-->
-                    <!--                         style="width:100%;height:100%;object-fit:cover;object-position:center;"-->
-                    <!--                         alt="">-->
 
                     <div class="blog-image-contain">
                         <ul class="contain-list">
@@ -131,7 +127,8 @@
                             <li th:each="comment : ${comments}">
                                 <div class="user-box border-color">
                                     <div class="user-image">
-                                        <img th:src="${comment.user.image}" class="img-fluid" alt="User Avatar">
+                                        <img th:src="@{'/seller/'  + ${comment.user.image}}" class="img-fluid" alt="User Avatar">
+
                                         <div class="user-name">
                                             <h6 th:text="${#temporals.format(comment.createdAt, 'dd MMM yyyy')}">Comment date</h6>
                                             <h5 class="text-content" th:text="${comment.user.fullName}">Comment author</h5>

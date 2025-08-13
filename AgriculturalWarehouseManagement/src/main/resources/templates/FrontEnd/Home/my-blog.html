@@ -142,11 +142,12 @@
                         </li>
 
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link " id="deleted" data-bs-toggle="pill"
-                                    data-bs-target="#pills-product" type="button" role="tab"><i
-                                    data-feather="shopping-bag"></i> Đã Xóa Gần Đây
+                            <button class="nav-link" id="pills-deleted-tab" data-bs-toggle="pill"
+                                    data-bs-target="#deleted-blog" type="button" role="tab">
+                                <i data-feather="trash-2"></i> Đã Xóa Gần Đây
                             </button>
                         </li>
+
 
 
                     </ul>
@@ -512,6 +513,74 @@
 
 
 
+<script >
+    function loadDeletedBlogs() {
+        const url = `${CONTEXT_PATH}/api/my-blog/page?page=1&size=${pageSize}&status=DELETED`;
+        axios.get(url)
+            .then(res => {
+                const blogs = res.data.blogs || [];
+                const tbody = document.getElementById("blogTableDeletedBody");
+                tbody.innerHTML = "";
+
+                blogs.forEach((blog, idx) => {
+                    const tr = document.createElement("tr");
+                    const thumb = blog.thumbnail || "no-image.png";
+                    const imageSrc = `${CONTEXT_PATH}/blog/${thumb}`;
+                    tr.innerHTML = `
+                    <td>${idx + 1}</td>
+                    <td><img src="${imageSrc}" style="max-width:100px; max-height:60px;" alt=""></td>
+                    <td>${blog.content && blog.content.length > 40 ? blog.content.substring(0, 40) + '...' : blog.content || ''}</td>
+                    <td>${blog.title || ""}</td>
+                    <td><b><i>${blog.author || ""}</i></b></td>
+                    <td><span style="font-weight:bold;color:red">${getStatusLabelVi(blog.status)}</span></td>
+                    <td>${formatDate(blog.createdAt)}</td>
+                    <td><button class="btn btn-sm btn-success" onclick="restoreBlog(${blog.blogID})">Khôi phục</button></td>
+                `;
+                    tbody.appendChild(tr);
+                });
+
+                if (window.feather) feather.replace();
+            })
+            .catch(err => {
+                console.error("Lỗi khi load blog đã xoá:", err);
+            });
+    }
+    function restoreBlog(blogID) {
+        Swal.fire({
+            title: "Khôi phục blog?",
+            text: "Bạn chắc chắn muốn khôi phục bài viết này?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Khôi phục"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios.put(`${CONTEXT_PATH}/api/my-blog/restore/${blogID}`)
+                    .then(() => {
+                        Swal.fire("✅ Khôi phục thành công", "", "success");
+                        loadDeletedBlogs();
+                        loadBlogPage(1);
+                        loadTotalBlogs();
+                    })
+                    .catch(() => {
+                        Swal.fire("❌ Lỗi khi khôi phục", "", "error");
+                    });
+            }
+        });
+    }
+    document.getElementById("pills-deleted-tab")?.addEventListener("click", function () {
+        loadDeletedBlogs();
+    });
+    const daysLeft = getDaysLeft(blog.blogDateUpdate);
+    td.innerHTML = `Còn ${daysLeft} ngày để khôi phục`;
+
+    function getDaysLeft(dateStr) {
+        const deletedAt = new Date(dateStr);
+        const now = new Date();
+        const diffTime = 30 * 24 * 60 * 60 * 1000 - (now - deletedAt);
+        return Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+    }
+
+</script>
 
 <script>
     function getStatusLabelVi(status) {

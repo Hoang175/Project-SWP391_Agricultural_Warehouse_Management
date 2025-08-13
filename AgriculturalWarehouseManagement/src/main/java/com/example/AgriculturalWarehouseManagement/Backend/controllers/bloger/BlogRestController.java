@@ -235,4 +235,12 @@ public class BlogRestController {
         return ResponseEntity.ok(numberBlogUsers );
     }
 
+    // Code them
+    @PutMapping("/restore/{blogId}")
+    public ResponseEntity<?> restoreBlog(@PathVariable Long blogId) {
+        blogService.restoreBlog(blogId); // logic đổi status về ACTIVE
+        return ResponseEntity.ok().build();
+    }
+
+
 }

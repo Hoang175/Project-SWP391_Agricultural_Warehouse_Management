@@ -26,10 +26,6 @@ public class BlogService {
 
     private final BlogRepository blogRepository;
 
-    public List<Blog> getAllActiveBlogs() {
-        return blogRepository.findAllActiveWithDetail(BlogStatus.ACTIVE);
-    }
-
     @Transactional(readOnly = true)
     public Blog getBlogById(Integer id) {
         return blogRepository.findByIdWithDetail(id);
@@ -62,29 +58,10 @@ public class BlogService {
         return blogRepository.searchByAuthorOrContent(BlogStatus.ACTIVE, keyword, pageable);
     }
 
-    // User CRUD
-    // Lấy blog cá nhân (không phân trang)
-    public List<Blog> getBlogsByUser(Long userId) {
-        return blogRepository.findByUserIdWithDetail(userId);
-    }
-
-    public Page<Blog> getBlogsByUserPage(Long userId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return blogRepository.findByUserIDAndStatusOrderByCreatedAtDesc(userId, BlogStatus.ACTIVE, pageable);
-    }
-
-    public List<Blog> findByUserId(Long userId) {
-        return blogRepository.findByUserID(userId);
-    }
-
     public Blog save(Blog blog) {
         return blogRepository.save(blog);
     }
 
-    public Page<Blog> getAllStatusBlogsByUserPage(Long userId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        return blogRepository.findByUserIDOrderByCreatedAtDesc(userId, pageable);
-    }
 
     public void deleteById(Integer id) {
         Blog blog = blogRepository.findById(id).orElse(null);
@@ -101,9 +78,7 @@ public class BlogService {
         return blogRepository.findAll(pageable);
     }
 
-    public Page<Blog> getBlogsByUserAndStatusPage(Long userId, BlogStatus status, int page, int size) {
-        return blogRepository.findByUserIDAndStatusOrderByCreatedAtDesc(userId, status, PageRequest.of(page, size));
-    }
+
 
     public Page<Blog> getAllBlogsPageByStatus(int page, int size, BlogStatus status) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
@@ -114,5 +89,22 @@ public class BlogService {
         Long numberOfBlogs = blogRepository.countBlogsByUserId(userId);
         return numberOfBlogs;
     }
+
+    // Code them luc nghi he
+    public void restoreBlog(Long blogId) {
+        Blog blog = blogRepository.findById(blogId.intValue()).orElse(null);
+        if (blog != null && blog.getStatus() == BlogStatus.DELETED) {
+            blog.setStatus(BlogStatus.ACTIVE);
+            blog.setBlogDateUpdate(new Date());
+            blogRepository.save(blog);
+        }
+    }
+
+    public void deletePermanentlyBlogsOver30Days() {
+        Date thresholdDate = new Date(System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000); // 30 ngày trước
+        List<Blog> expiredDeletedBlogs = blogRepository.findDeletedBlogsBefore(thresholdDate);
+        blogRepository.deleteAll(expiredDeletedBlogs); // Xóa vĩnh viễn
+    }
+
 
 }
